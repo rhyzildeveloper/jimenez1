@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Code Hack Rush</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', monospace;
+      background: repeating-linear-gradient(
+        135deg,
+        #000 0px,
+        #000 10px,
+        #111 10px,
+        #111 20px
+      );
+      color: #00ff88;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: backgroundScroll 5s linear infinite;
+    }
+
+    @keyframes backgroundScroll {
+      from { background-position: 0 0; }
+      to { background-position: 100px 100px; }
+    }
+
+    .glow {
+      text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+    }
+
+    .terminal-box {
+      background-color: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 0 15px #00ff88, inset 0 0 10px #00ff88;
+      border: 1px solid #00ff88;
+      padding: 24px;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 12px;
+    }
+
+    #word {
+      font-size: 1.25em;
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #00ff88;
+      background-color: #000;
+      color: #00ff88;
+      outline: none;
+    }
+
+    .info {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 0.9em;
+    }
+
+    #status {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 24px;
+    }
+
+    .btn {
+      margin-top: 16px;
+      padding: 10px 20px;
+      font-size: 1em;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: #00ff88;
+      color: #000;
+      cursor: pointer;
+      display: none;
+    }
+
+    .btn:hover {
+      background-color: #00cc66;
+    }
+
+    .text-green { color: #00ff88; }
+    .text-red { color: #ff4444; }
+  </style>
+</head>
+<body>
+  <div class="terminal-box">
+    <h1 class="glow">CODE HACK RUSH</h1>
+    <div>🧠 Type the code snippet below before time runs out!</div>
+    
+    <div id="word" class="glow"></div>
+
+    <input id="input" placeholder="Start typing..." autofocus />
+
+    <div class="info">
+      <div>⏱️ Time: <span id="time">10</span>s</div>
+      <div>🔥 Score: <span id="score">0</span></div>
+    </div>
+
+    <div id="status" class="glow"></div>
+    <button onclick="restartGame()" id="restartBtn" class="btn">Play Again</button>
+  </div>
+
+  <script>
+    const words = [
+      "sudo access_granted();",
+      "trace_firewall();",
+      "initiate_hack_sequence();",
+      "while(pwned){loop();}",
+      "let passcode = '0xDEADBEEF';",
+      "console.log('Hacked');",
+      "encrypt(payload);",
+      "if(breach) unlock();",
+      "fetch('/admin');",
+      "run_exploit_script();"
+    ];
+
+    let currentWord = '';
+    let score = 0;
+    let time = 10;
+    let timer;
+    const wordEl = document.getElementById("word");
+    const inputEl = document.getElementById("input");
+    const timeEl = document.getElementById("time");
+    const scoreEl = document.getElementById("score");
+    const statusEl = document.getElementById("status");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function setNewWord() {
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      wordEl.innerText = currentWord;
+      inputEl.value = '';
+    }
+
+    function startGame() {
+      score = 0;
+      time = 10;
+      setNewWord();
+      statusEl.innerText = '';
+      restartBtn.style.display = "none";
+      inputEl.disabled = false;
+      inputEl.focus();
+      timer = setInterval(() => {
+        time--;
+        timeEl.innerText = time;
+        if (time <= 0) {
+          clearInterval(timer);
+          gameOver();
+        }
+      }, 1000);
+    }
+
+    function gameOver() {
+      inputEl.disabled = true;
+      statusEl.innerText = '❌ ACCESS DENIED!';
+      statusEl.classList.remove("text-green");
+      statusEl.classList.add("text-red");
+      restartBtn.style.display = "inline-block";
+    }
+
+    function restartGame() {
+      statusEl.classList.remove("text-red");
+      statusEl.classList.add("text-green");
+      startGame();
+    }
+
+    inputEl.addEventListener("input", () => {
+      if (inputEl.value === currentWord) {
+        score++;
+        scoreEl.innerText = score;
+        setNewWord();
+        time += 3;
+        timeEl.innerText = time;
+        statusEl.innerText = '✅ ACCESS GRANTED!';
+        statusEl.classList.remove("text-red");
+        statusEl.classList.add("text-green");
+      }
+    });
+
+    startGame();
+  </script>
+</body>
+</html>
