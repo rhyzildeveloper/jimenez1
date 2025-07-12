@@ -97,7 +97,13 @@
     }
   </style>
 </head>
-<body class="flex items-center justify-center min-h-screen px-4 relative scanlines crt">
+<body class="flex items-center justify-center min-h-screen px-4 relative scanlines crt"
+      oncopy="return false" 
+      oncut="return false" 
+      onpaste="return false" 
+      oncontextmenu="return false" 
+      ondragstart="return false" 
+      onselectstart="return false">
 
   <!-- Net Animation Canvas -->
   <canvas id="netCanvas"></canvas>
@@ -120,7 +126,10 @@
     <input id="input" 
            class="w-full p-2 rounded bg-black border border-green-500 text-green-300 focus:outline-none focus:ring focus:ring-green-400"
            placeholder="Start typing..." 
-           autofocus>
+           autofocus 
+           oncopy="return false" 
+           onpaste="return false"
+           oncut="return false">
 
     <div class="flex justify-between items-center mt-4 text-sm text-green-300 font-mono">
       <div>⏱️ Time: <span id="time">10</span>s</div>
@@ -140,6 +149,13 @@
   <audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d48e384bb7.mp3?filename=keyboard-typing-6993.mp3"></audio>
 
   <script>
+    // Disable keyboard shortcuts for copy/paste
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "v" || e.key === "x" || e.key === "u")) {
+        e.preventDefault();
+      }
+    });
+
     const canvas = document.getElementById("netCanvas");
     const ctx = canvas.getContext("2d");
     let width, height, dots;
