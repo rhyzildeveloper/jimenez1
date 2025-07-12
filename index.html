@@ -120,7 +120,13 @@
     <input id="input" 
            class="w-full p-2 rounded bg-black border border-green-500 text-green-300 focus:outline-none focus:ring focus:ring-green-400"
            placeholder="Start typing..." 
-           autofocus>
+           autofocus 
+           autocomplete="off"
+           oncopy="return false"
+           onpaste="return false"
+           oncut="return false"
+           oncontextmenu="return false"
+           onkeydown="if(event.ctrlKey && (event.key==='v'||event.key==='c'||event.key==='x'||event.key==='u')) event.preventDefault();">
 
     <div class="flex justify-between items-center mt-4 text-sm text-green-300 font-mono">
       <div>⏱️ Time: <span id="time">10</span>s</div>
@@ -140,6 +146,21 @@
   <audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d48e384bb7.mp3?filename=keyboard-typing-6993.mp3"></audio>
 
   <script>
+    // 🔒 Global copy/paste/cut/inspect prevention
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('paste', e => e.preventDefault());
+    document.addEventListener('cut', e => e.preventDefault());
+    document.addEventListener('dragstart', e => e.preventDefault());
+    document.addEventListener('selectstart', e => e.preventDefault());
+
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'u', 's'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    });
+
+    // Canvas Animation
     const canvas = document.getElementById("netCanvas");
     const ctx = canvas.getContext("2d");
     let width, height, dots;
@@ -187,20 +208,16 @@
 
     function animate() {
       ctx.clearRect(0, 0, width, height);
-
       for (let dot of dots) {
         dot.x += dot.vx;
         dot.y += dot.vy;
-
         if (dot.x < 0 || dot.x > width) dot.vx *= -1;
         if (dot.y < 0 || dot.y > height) dot.vy *= -1;
-
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
         ctx.fillStyle = "lime";
         ctx.fill();
       }
-
       drawLines();
       requestAnimationFrame(animate);
     }
@@ -209,6 +226,7 @@
     resize();
     animate();
 
+    // Game Logic
     const words = [
       "sudo access_granted();",
       "trace_firewall();",
