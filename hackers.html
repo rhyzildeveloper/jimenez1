@@ -18,6 +18,12 @@
       top: 0;
       left: 0;
       z-index: 0;
+      pointer-events: none;
+    }
+
+    #matrixRain {
+      width: 100vw !important;
+      height: 100vh !important;
     }
 
     .glow {
@@ -55,37 +61,6 @@
       pointer-events: none;
     }
 
-    .rain {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-      font-size: 14px;
-      line-height: 16px;
-      color: rgba(0, 255, 0, 0.2);
-      animation: flicker 2s infinite alternate;
-    }
-
-    @keyframes flicker {
-      0% { opacity: 1; }
-      100% { opacity: 0.9; }
-    }
-
-    @keyframes rainScroll {
-      0% { transform: translateY(-100%); }
-      100% { transform: translateY(100%); }
-    }
-
-    .rain span {
-      display: block;
-      white-space: nowrap;
-      animation: rainScroll 6s linear infinite;
-    }
-
     .text-animate {
       animation: pulse 0.5s;
     }
@@ -99,16 +74,9 @@
 </head>
 <body class="flex items-center justify-center min-h-screen px-4 relative scanlines crt">
 
-  <!-- Net Animation Canvas -->
-  <canvas id="netCanvas"></canvas>
-
-  <!-- Background rain effect -->
-  <div class="rain z-0">
-    <span>0101010010110101011001110101011010101</span>
-    <span>1110001101011010101010101010101010101</span>
-    <span>0001010101011111010101110101010101010</span>
-    <span>0101110101010101011010101001010101011</span>
-  </div>
+  <!-- Canvases -->
+  <canvas id="matrixRain"></canvas> <!-- Fullscreen matrix rain -->
+  <canvas id="netCanvas"></canvas>   <!-- Net grid background -->
 
   <!-- Terminal UI -->
   <div class="z-10 terminal-box p-6 rounded-xl w-full max-w-2xl text-center">
@@ -146,26 +114,25 @@
   <audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d48e384bb7.mp3?filename=keyboard-typing-6993.mp3"></audio>
 
   <script>
-    // 🔒 Global copy/paste/cut/inspect prevention
+    // 🔒 Prevent dev tools & clipboard actions
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('copy', e => e.preventDefault());
     document.addEventListener('paste', e => e.preventDefault());
     document.addEventListener('cut', e => e.preventDefault());
     document.addEventListener('dragstart', e => e.preventDefault());
     document.addEventListener('selectstart', e => e.preventDefault());
-
     document.addEventListener('keydown', function(e) {
       if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'u', 's'].includes(e.key.toLowerCase())) {
         e.preventDefault();
       }
     });
 
-    // Canvas Animation
+    // 🟩 Net Grid Background
     const canvas = document.getElementById("netCanvas");
     const ctx = canvas.getContext("2d");
     let width, height, dots;
 
-    function resize() {
+    function resizeNet() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
       initDots();
@@ -206,7 +173,7 @@
       }
     }
 
-    function animate() {
+    function animateNet() {
       ctx.clearRect(0, 0, width, height);
       for (let dot of dots) {
         dot.x += dot.vx;
@@ -219,14 +186,14 @@
         ctx.fill();
       }
       drawLines();
-      requestAnimationFrame(animate);
+      requestAnimationFrame(animateNet);
     }
 
-    window.addEventListener("resize", resize);
-    resize();
-    animate();
+    window.addEventListener("resize", resizeNet);
+    resizeNet();
+    animateNet();
 
-    // Game Logic
+    // 🎮 Game Logic
     const words = [
       "sudo access_granted();",
       "trace_firewall();",
@@ -308,6 +275,50 @@
     });
 
     startGame();
+
+    // 🌧️ Matrix Rain Effect
+    const rainCanvas = document.getElementById("matrixRain");
+    const rainCtx = rainCanvas.getContext("2d");
+
+    function resizeRain() {
+      rainCanvas.width = window.innerWidth;
+      rainCanvas.height = window.innerHeight;
+    }
+    resizeRain();
+
+    const fontSize = 16;
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops = Array(columns).fill(1);
+    const matrixChars = "01".split("");
+
+    function drawMatrix() {
+      rainCtx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      rainCtx.fillRect(0, 0, rainCanvas.width, rainCanvas.height);
+
+      rainCtx.fillStyle = "#0F0";
+      rainCtx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        rainCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > rainCanvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+
+      requestAnimationFrame(drawMatrix);
+    }
+
+    drawMatrix();
+
+    window.addEventListener("resize", () => {
+      resizeRain();
+      columns = Math.floor(window.innerWidth / fontSize);
+      drops = Array(columns).fill(1);
+    });
   </script>
 </body>
 </html>
